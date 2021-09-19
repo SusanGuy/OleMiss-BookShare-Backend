@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
       lowercase: true,
-      validatr(value) {
+      validate(value) {
         if (!validator.isEmail(value)) {
           throw new Error("Email is invalid");
         }
@@ -35,7 +35,14 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+      trim: true,
     },
+    bookmarks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "BookForSale",
+      },
+    ],
   },
   {
     toJSON: true,
@@ -90,5 +97,4 @@ userSchema.pre("save", async function (next) {
 });
 
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;
