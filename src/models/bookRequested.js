@@ -7,6 +7,11 @@ const bookRequestedSchema = new mongoose.Schema(
       ref: "Book",
       required: true,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     contact_number: {
       type: String,
       required: true,

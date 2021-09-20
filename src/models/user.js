@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const jwt = require("jwt");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
   {
@@ -25,13 +25,16 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 7,
+      minlength: 6,
       trim: true,
       validate(value) {
         if (value.toLowerCase().includes("password")) {
           throw new Error('Password cannot contain "password"');
         }
       },
+    },
+    token: {
+      type: String,
     },
     avatar: {
       type: String,
@@ -46,17 +49,34 @@ const userSchema = new mongoose.Schema(
   },
   {
     toJSON: true,
-    toObject: true,
     timestamps: true,
   }
 );
+
+// To use virtual fields(Books Sold by this user)
+userSchema.virtual("booksForSale", {
+  ref: "BookForSale",
+  //   Field on this document
+  localField: "_id",
+  //   Field on the other document
+  foreignField: "seller",
+});
+
+// To use virtual fields(Book Requested by this user)
+userSchema.virtual("booksRequested", {
+  ref: "BookRequested",
+  //   Field on this document
+  localField: "_id",
+  //   Field on the other document
+  foreignField: "user",
+});
 
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
   delete userObject.password;
   delete userObject.token;
-  delete userObject.ingredients;
+  delete userObject.bookmarks;
   return userObject;
 };
 
