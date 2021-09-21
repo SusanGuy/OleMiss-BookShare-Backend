@@ -163,9 +163,16 @@ const getUserBookmarks = async (req, res) => {
   }
 };
 
+//Use virtual field to build these apis
+const getBooksUserSold = async (req, res) => {};
+const getBooksUserRequested = async (req, res) => {};
+
 //Todo: Upload Image to AWS S3 and save the url to image avatar
 const changeAvatar = async (req, res) => {};
 const deleteAvatar = async (req, res) => {};
+
+//Ways to handle password change
+const changePassword = async (req, res) => {};
 
 module.exports = {
   signupUser,
@@ -174,6 +181,10 @@ module.exports = {
   logout,
   updateUser,
   changeAvatar,
+  deleteAvatar,
   deleteUser,
   getUserBookmarks,
+  changePassword,
+  getBooksUserSold,
+  getBooksUserRequested,
 };

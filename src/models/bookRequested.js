@@ -21,11 +21,14 @@ const bookRequestedSchema = new mongoose.Schema(
       name: String,
       code: Number,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
     toJSON: true,
-    toObject: true,
   }
 );
 

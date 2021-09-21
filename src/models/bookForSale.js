@@ -17,10 +17,9 @@ const bookForSaleSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    buyer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
+    active: {
+      type: Boolean,
+      default: true,
     },
     contact_number: {
       type: String,
@@ -47,7 +46,6 @@ const bookForSaleSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: true,
-    toObject: true,
   }
 );
 
