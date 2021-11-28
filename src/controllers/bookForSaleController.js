@@ -200,12 +200,6 @@ const getOneBookOnSale = async (req, res) => {
     });
   }
 };
-
-const searchBookOnSale = async (req, res) => {
-  try {
-  } catch (error) {}
-};
-
 const deleteBookOnSale = async (req, res) => {
   try {
     const bookForSale = await BookForSale.findOne({
@@ -240,5 +234,4 @@ module.exports = {
   getAllBooksOnSale,
   getOneBookOnSale,
   deleteBookOnSale,
-  searchBookOnSale,
 };
