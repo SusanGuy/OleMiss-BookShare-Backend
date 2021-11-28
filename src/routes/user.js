@@ -4,18 +4,32 @@ const {
   loginUser,
   signupUser,
   getLoggedInUserInfo,
-  logout,
+  logoutUser,
+  logoutUserEverywhere,
   updateUser,
-  deleteUser,
+  changeAvatar,
+  deleteAvatar,
   getUserBookmarks,
+  getBooksUserSold,
+  getBooksUserRequested,
+  getUserInfo,
+  bookmarkABook,
+  deleteBookmark,
 } = require("../controllers/userController");
 
-router.post("/login", loginUser);
-router.post("/signup", signupUser);
-router.get("/me", auth, getLoggedInUserInfo);
-router.post("/logout", auth, logout);
-router.patch("/me", auth, updateUser);
-router.delete("/me", auth, deleteUser);
 router.get("/me/bookmarks", auth, getUserBookmarks);
+router.get("/me/sale", auth, getBooksUserSold);
+router.get("/me/requests", auth, getBooksUserRequested);
+router.get("/me", auth, getLoggedInUserInfo);
+router.get("/:id", auth, getUserInfo);
+router.post("/bookmark/:id", auth, bookmarkABook);
+router.post("/login", loginUser);
+router.post("/", signupUser);
+router.post("/me/avatar", auth, changeAvatar);
+router.post("/logout", auth, logoutUser);
+router.post("/logoutAll", auth, logoutUserEverywhere);
+router.patch("/me", auth, updateUser);
+router.delete("/me/avatar", auth, deleteAvatar);
+router.delete("/bookmark/:id", auth, deleteBookmark);
 
 module.exports = router;

@@ -20,7 +20,14 @@ const userSchema = new mongoose.Schema(
         if (!validator.isEmail(value)) {
           throw new Error("Email is invalid");
         }
+        if (!value.includes("go.olemiss.edu")) {
+          throw new Error("Must be an Ole Miss email!");
+        }
       },
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
     password: {
       type: String,
@@ -33,12 +40,35 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
-    token: {
-      type: String,
-    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     avatar: {
       type: String,
       trim: true,
+    },
+    contact_number: {
+      value: { type: String },
+      visibility: { type: Boolean, default: false },
+    },
+    classification: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    major: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
     },
     bookmarks: [
       {
@@ -49,6 +79,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     toJSON: true,
+
     timestamps: true,
   }
 );
@@ -60,6 +91,7 @@ userSchema.virtual("booksForSale", {
   localField: "_id",
   //   Field on the other document
   foreignField: "seller",
+  options: { sort: { createdAt: -1 } },
 });
 
 // To use virtual fields(Book Requested by this user)
@@ -69,50 +101,45 @@ userSchema.virtual("booksRequested", {
   localField: "_id",
   //   Field on the other document
   foreignField: "user",
+  // options: { sort: { active: 1, createdAt: -1 } },
 });
 
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
+  delete userObject.isAdmin;
   delete userObject.password;
-  delete userObject.token;
-  delete userObject.bookmarks;
+  delete userObject.tokens;
   return userObject;
 };
 
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET);
-
-  user.token = token;
-  await user.save();
-
+  await User.updateOne(
+    { email: user.email },
+    { tokens: user.tokens.concat({ token }) }
+  );
   return token;
 };
 
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
-
   if (!user) {
-    throw new Error("Unable to login");
+    throw new Error("Email or password is invalid");
   }
-
   const isMatch = await bcrypt.compare(password, user.password);
-
   if (!isMatch) {
-    throw new Error("Unable to login");
+    throw new Error("Email or password is invalid");
   }
-
   return user;
 };
 
 userSchema.pre("save", async function (next) {
   const user = this;
-
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 8);
   }
-
   next();
 });
 

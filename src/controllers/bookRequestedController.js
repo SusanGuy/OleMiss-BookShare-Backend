@@ -1,55 +1,70 @@
-const Book = require("../models/book");
 const BookRequested = require("../models/bookRequested");
 
 const requestABook = async (req, res) => {
-  const { contact_number, course, ...rest } = req.body;
   try {
-    let book = await Book.findOne({ isbn: rest.isbn });
-    if (!book) {
-      book = new Book(...rest);
-      await book.save();
+    const { isbn, title, edition, authors, course_name, course_code } =
+      req.body;
+    let bookRequested;
+    if (req.body.id) {
+      bookRequested = await BookRequested.findOne({
+        _id: req.body.id,
+        user: req.user,
+      });
+      bookRequested.book = {
+        ...bookRequested.book,
+        isbn,
+        title,
+        edition,
+        authors,
+      };
+      bookRequested.course_code = course_code;
+      bookRequested.course_name = course_name;
+    } else {
+      const book = await BookRequested.findOne({
+        "book.isbn": isbn,
+        active: true,
+        seller: req.user,
+      });
+      if (book) {
+        return res.status(403).send({
+          errMessage: "You have already requested this book!",
+        });
+      }
+      bookRequested = new BookRequested({
+        book: {
+          isbn,
+          title,
+          edition,
+          authors: authors.includes(",") ? authors.split(",") : [authors],
+        },
+        course_name,
+        course_code,
+        user: req.user,
+      });
     }
-    const bookRequested = new BookRequested({
-      book,
-      user: req.user,
-      contact_number,
-      course,
-    });
+
     await bookRequested.save();
     res.send(bookRequested);
   } catch (error) {
     res.status(500).send({
-      error: error.message,
+      errMessage: error.message,
     });
   }
-};
-
-//How do I handle multiple user trying to update book with same isbn
-const updateBookRequested = async (req, res) => {
-  try {
-  } catch (error) {}
 };
 
 const getAllRequestedBooks = async (req, res) => {
   try {
-    const booksRequested = await BookRequested.find({ active: true });
+    const booksRequested = await BookRequested.find({
+      active: true,
+      deleted: false,
+      user: { $ne: req.user._id },
+    })
+      .populate({
+        path: "user",
+        select: "name avatar email contact_number",
+      })
+      .sort({ createdAt: -1 });
     res.send(booksRequested);
-  } catch (error) {
-    res.status(500).send({
-      error: error.message,
-    });
-  }
-};
-
-const getOneRequestedBook = async (req, res) => {
-  try {
-    const bookRequested = await BookRequested.findById(req.params.id);
-    if (!bookRequested) {
-      return res.status(404).send({
-        error: "No such book found",
-      });
-    }
-    res.send(bookRequested);
   } catch (error) {
     res.status(500).send({
       error: error.message,
@@ -59,15 +74,15 @@ const getOneRequestedBook = async (req, res) => {
 
 const markRequestedBookAsFound = async (req, res) => {
   try {
-    const bookRequested = await BookRequested.findById(req.params.id);
+    const bookRequested = await BookRequested.findOne({
+      _id: req.params.id,
+      active: true,
+      deleted: false,
+      seller: req.user,
+    });
     if (!bookRequested) {
       return res.status(404).send({
         error: "No such book found",
-      });
-    }
-    if (bookRequested.user.toString() !== req.user.id.toString()) {
-      return res.status(401).send({
-        error: "Not Authorized",
       });
     }
     bookRequested.active = false;
@@ -82,18 +97,23 @@ const markRequestedBookAsFound = async (req, res) => {
 
 const deleteRequestedBook = async (req, res) => {
   try {
-    const bookRequested = await BookRequested.findById(req.params.id);
+    const bookRequested = await BookRequested.findOne({
+      _id: req.params.id,
+      seller: req.user,
+    });
     if (!bookRequested) {
       return res.status(404).send({
         error: "No such book found",
       });
     }
-    if (bookRequested.user.toString() !== req.user.id.toString()) {
-      return res.status(401).send({
-        error: "Not Authorized",
-      });
-    }
-    await bookRequested.remove();
+    // if (bookRequested.user.toString() !== req.user.id.toString()) {
+    //   return res.status(401).send({
+    //     error: "Not Authorized",
+    //   });
+    // }
+    bookRequested.active = false;
+    bookRequested.deleted = true;
+    await bookRequested.save();
     res.send();
   } catch (error) {
     res.status(500).send({
@@ -104,9 +124,7 @@ const deleteRequestedBook = async (req, res) => {
 
 module.exports = {
   requestABook,
-  updateBookRequested,
   getAllRequestedBooks,
-  getOneRequestedBook,
   markRequestedBookAsFound,
   deleteRequestedBook,
 };

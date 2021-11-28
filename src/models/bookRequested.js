@@ -3,32 +3,59 @@ const mongoose = require("mongoose");
 const bookRequestedSchema = new mongoose.Schema(
   {
     book: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Book",
-      required: true,
+      title: {
+        type: String,
+        trim: true,
+        required: true,
+      },
+
+      isbn: {
+        type: String,
+        trim: true,
+        required: true,
+        validate(value) {
+          if (value.length !== 10 && value.length !== 13) {
+            throw new Error("ISBN can only be 10 or 13 numbers long!");
+          }
+        },
+      },
+      edition: {
+        type: String,
+        required: true,
+      },
+
+      authors: [
+        {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      ],
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    contact_number: {
+    course_name: {
       type: String,
-      required: true,
       trim: true,
     },
-    course: {
-      name: String,
-      code: Number,
+    course_code: {
+      type: String,
+      trim: true,
     },
     active: {
       type: Boolean,
       default: true,
     },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
-    toJSON: true,
   }
 );
 

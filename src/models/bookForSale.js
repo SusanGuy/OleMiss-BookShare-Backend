@@ -3,11 +3,34 @@ const mongoose = require("mongoose");
 const bookForSaleSchema = new mongoose.Schema(
   {
     book: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Book",
-      required: true,
-    },
+      title: {
+        type: String,
+        trim: true,
+        required: true,
+      },
+      isbn: {
+        type: String,
+        trim: true,
+        required: true,
+        validate(value) {
+          if (value.length !== 10 && value.length !== 13) {
+            throw new Error("ISBN can only be 10 or 13 numbers long!");
+          }
+        },
+      },
+      edition: {
+        type: String,
+        required: true,
+      },
 
+      authors: [
+        {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      ],
+    },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -21,16 +44,12 @@ const bookForSaleSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    contact_number: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    picture: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    pictures: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     condition: {
       type: String,
       enum: ["NEW", "USED"],
@@ -38,14 +57,21 @@ const bookForSaleSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    course: {
-      name: String,
-      code: Number,
+    course_name: {
+      type: String,
+      trim: true,
+    },
+    course_code: {
+      type: String,
+      trim: true,
+    },
+    deleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
     timestamps: true,
-    toJSON: true,
   }
 );
 
