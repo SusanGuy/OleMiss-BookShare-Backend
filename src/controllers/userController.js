@@ -221,7 +221,7 @@ const deleteUser = async (req, res) => {
 
 const bookmarkABook = async (req, res) => {
   try {
-    req.user.bookmarks.push(req.params.id);
+    req.user.bookmarks.unshift(req.params.id);
     await req.user.save();
     res.send();
   } catch (error) {
