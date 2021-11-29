@@ -168,7 +168,9 @@ const getAllBooksOnSale = async (req, res) => {
       active: true,
       seller: { $ne: req.user._id },
       deleted: false,
-    }).sort({ createdAt: -1 });
+    })
+      .sort({ createdAt: -1 })
+      .select("-reports");
     res.send(booksOnSale);
   } catch (error) {
     res.status(500).send({
@@ -183,10 +185,12 @@ const getOneBookOnSale = async (req, res) => {
       _id: req.params.id,
       active: true,
       deleted: false,
-    }).populate({
-      path: "seller",
-      select: "name email contact_number bookmarks",
-    });
+    })
+      .populate({
+        path: "seller",
+        select: "name email contact_number bookmarks",
+      })
+      .select("-reports");
 
     if (!bookForSale) {
       return res.status(404).send({
@@ -227,6 +231,32 @@ const deleteBookOnSale = async (req, res) => {
   }
 };
 
+const reportABook = async (req, res) => {
+
+  try {
+    const reporter = req.user;
+    const reportedBook = await BookForSale.findById(req.params.id);
+    if (
+      reportedBook.reports.length > 0 &&
+      reportedBook.reports.filter(
+        (user) => user.toString() === reporter._id.toString()
+      )
+    ) {
+      return res.status(404).send({
+        error: "You have already reported this book",
+      });
+    }
+    reportedBook.reports.unshift(req.user);
+    await reportedBook.save();
+    res.send();
+  } catch (error) {
+
+    res.status(500).send({
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   sellABook,
   updateBookForSale,
@@ -234,4 +264,5 @@ module.exports = {
   getAllBooksOnSale,
   getOneBookOnSale,
   deleteBookOnSale,
+  reportABook,
 };

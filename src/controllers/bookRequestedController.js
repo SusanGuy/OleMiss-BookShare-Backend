@@ -63,7 +63,8 @@ const getAllRequestedBooks = async (req, res) => {
         path: "user",
         select: "name avatar email contact_number",
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .select("-reports");
     res.send(booksRequested);
   } catch (error) {
     res.status(500).send({
@@ -106,14 +107,34 @@ const deleteRequestedBook = async (req, res) => {
         error: "No such book found",
       });
     }
-    // if (bookRequested.user.toString() !== req.user.id.toString()) {
-    //   return res.status(401).send({
-    //     error: "Not Authorized",
-    //   });
-    // }
+
     bookRequested.active = false;
     bookRequested.deleted = true;
     await bookRequested.save();
+    res.send();
+  } catch (error) {
+    res.status(500).send({
+      error: error.message,
+    });
+  }
+};
+
+const reportABook = async (req, res) => {
+  try {
+    const reporter = req.user;
+    const reportedBook = await BookRequested.findById(req.params.id);
+    if (
+      reportedBook.reports.length > 0 &&
+      reportedBook.reports.filter(
+        (user) => user.toString() === reporter._id.toString()
+      )
+    ) {
+      return res.status(404).send({
+        error: "You have already reported this book",
+      });
+    }
+    reportedBook.reports.unshift(req.user);
+    await reportedBook.save();
     res.send();
   } catch (error) {
     res.status(500).send({
@@ -127,4 +148,5 @@ module.exports = {
   getAllRequestedBooks,
   markRequestedBookAsFound,
   deleteRequestedBook,
+  reportABook,
 };

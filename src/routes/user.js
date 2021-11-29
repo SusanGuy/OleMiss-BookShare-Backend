@@ -15,6 +15,7 @@ const {
   getUserInfo,
   bookmarkABook,
   deleteBookmark,
+  reportAUser,
 } = require("../controllers/userController");
 
 router.get("/me/bookmarks", auth, getUserBookmarks);
@@ -23,6 +24,7 @@ router.get("/me/requests", auth, getBooksUserRequested);
 router.get("/me", auth, getLoggedInUserInfo);
 router.get("/:id", auth, getUserInfo);
 router.post("/bookmark/:id", auth, bookmarkABook);
+router.post("/report/:id", auth, reportAUser);
 router.post("/login", loginUser);
 router.post("/", signupUser);
 router.post("/me/avatar", auth, changeAvatar);

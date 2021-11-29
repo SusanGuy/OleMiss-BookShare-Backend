@@ -69,6 +69,12 @@ const bookForSaleSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    reports: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,

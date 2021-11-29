@@ -126,9 +126,11 @@ const getUserInfo = async (req, res) => {
     const user = await User.findById(req.params.id)
       .populate({
         path: "booksForSale",
+        select: "-reports",
       })
       .populate({
         path: "booksRequested",
+        select: "-reports",
       });
 
     const sellingBooks = user.booksForSale.filter(
@@ -260,6 +262,7 @@ const getBooksUserSold = async (req, res) => {
     const { booksForSale } = await User.findById(req.user).populate({
       path: "booksForSale",
       match: { deleted: false },
+      select: "-reports",
     });
     res.send(booksForSale);
   } catch (error) {
@@ -271,6 +274,7 @@ const getBooksUserRequested = async (req, res) => {
     const { booksRequested } = await User.findById(req.user).populate({
       path: "booksRequested",
       match: { deleted: false },
+      select: "-reports",
     });
     res.send(booksRequested);
   } catch (error) {
@@ -326,6 +330,30 @@ const deleteAvatar = async (req, res) => {
   }
 };
 
+const reportAUser = async (req, res) => {
+  try {
+    const reporter = req.user;
+    const reportedUser = await User.findById(req.params.id);
+    if (
+      reportedUser.reports.length > 0 &&
+      reportedUser.reports.filter(
+        (user) => user.toString() === reporter._id.toString()
+      )
+    ) {
+      return res.status(404).send({
+        error: "You have already reported this user",
+      });
+    }
+    reportedUser.reports.unshift(req.user);
+    await reportedUser.save();
+    res.send();
+  } catch (error) {
+    res.status(500).send({
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   signupUser,
   loginUser,
@@ -342,4 +370,5 @@ module.exports = {
   getBooksUserRequested,
   bookmarkABook,
   deleteBookmark,
+  reportAUser,
 };

@@ -76,6 +76,12 @@ const userSchema = new mongoose.Schema(
         ref: "BookForSale",
       },
     ],
+    reports: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     toJSON: true,
@@ -110,6 +116,7 @@ userSchema.methods.toJSON = function () {
   delete userObject.isAdmin;
   delete userObject.password;
   delete userObject.tokens;
+  delete userObject.reports;
   return userObject;
 };
 
