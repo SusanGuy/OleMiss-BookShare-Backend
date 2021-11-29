@@ -136,6 +136,7 @@ const getUserInfo = async (req, res) => {
     );
     const profile = {
       id: user._id,
+      isAdmin: user.isAdmin,
       name: user.name,
       email: user.email,
       avatar: user.avatar,
