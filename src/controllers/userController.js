@@ -213,15 +213,6 @@ const updateUser = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
-  try {
-    await req.user.remove();
-    res.status(200).send();
-  } catch (error) {
-    res.status(500).send({ error: error.message });
-  }
-};
-
 const bookmarkABook = async (req, res) => {
   try {
     req.user.bookmarks.unshift(req.params.id);
@@ -366,7 +357,7 @@ module.exports = {
   getUserInfo,
   changeAvatar,
   deleteAvatar,
-  deleteUser,
+
   getUserBookmarks,
   getBooksUserSold,
   getBooksUserRequested,

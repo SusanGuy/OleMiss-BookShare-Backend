@@ -37,6 +37,7 @@ const getAllReportedBooksOnSale = async (req, res) => {
       if (book.reports.length > 0) {
         book.reports.forEach((report) => {
           reportedBooks.push({
+            reportId: report._id,
             book: book.book,
             _id: book._id,
             seller: book.seller,
@@ -73,6 +74,7 @@ const getAllReportedBooksRequested = async (req, res) => {
       if (book.reports.length > 0) {
         book.reports.forEach((report) => {
           reportedBooks.push({
+            reportId: report._id,
             book: book.book,
             seller: book.user,
             _id: book._id,
@@ -101,6 +103,7 @@ const getAllReportedUsers = async (req, res) => {
       if (user.reports.length > 0) {
         user.reports.forEach((report) => {
           reportedUsers.push({
+            reportId: report._id,
             name: user.name,
             avatar: user.avater,
             email: user.email,
@@ -178,6 +181,51 @@ const deleteBookOnSale = async (req, res) => {
   }
 };
 
+const deleteUserReport = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    user.reports = user.reports.filter(
+      (report) => report._id.toString() !== req.params.reportId.toString()
+    );
+    await user.save();
+    res.send();
+  } catch (error) {
+    res.status(500).send({
+      error: error.message,
+    });
+  }
+};
+
+const deleteBookRequestReport = async (req, res) => {
+  try {
+    const book = await BookRequested.findById(req.params.id);
+    book.reports = book.reports.filter(
+      (report) => report._id.toString() !== req.params.reportId.toString()
+    );
+    await book.save();
+    res.send();
+  } catch (error) {
+    res.status(500).send({
+      error: error.message,
+    });
+  }
+};
+
+const deleteBookSaleReport = async (req, res) => {
+  try {
+    const book = await BookForSale.findById(req.params.id);
+    book.reports = book.reports.filter(
+      (report) => report._id.toString() !== req.params.reportId.toString()
+    );
+    await book.save();
+    res.send();
+  } catch (error) {
+    res.status(500).send({
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllBooksOnSale,
   getAllBooksRequested,
@@ -187,4 +235,7 @@ module.exports = {
   getAllReportedBooksRequested,
   getAllReportedUsers,
   getAllUsers,
+  deleteBookSaleReport,
+  deleteBookRequestReport,
+  deleteUserReport,
 };
