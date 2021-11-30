@@ -78,8 +78,14 @@ const userSchema = new mongoose.Schema(
     ],
     reports: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        reporter: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },
@@ -113,7 +119,6 @@ userSchema.virtual("booksRequested", {
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
-  delete userObject.isAdmin;
   delete userObject.password;
   delete userObject.tokens;
   delete userObject.reports;

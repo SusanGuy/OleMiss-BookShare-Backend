@@ -337,14 +337,16 @@ const reportAUser = async (req, res) => {
     if (
       reportedUser.reports.length > 0 &&
       reportedUser.reports.filter(
-        (user) => user.toString() === reporter._id.toString()
+        (report) => report.reporter.toString() === reporter._id.toString()
       )
     ) {
       return res.status(404).send({
         error: "You have already reported this user",
       });
     }
-    reportedUser.reports.unshift(req.user);
+    reportedUser.reports.unshift({
+      reporter,
+    });
     await reportedUser.save();
     res.send();
   } catch (error) {

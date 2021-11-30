@@ -188,7 +188,7 @@ const getOneBookOnSale = async (req, res) => {
     })
       .populate({
         path: "seller",
-        select: "name email contact_number bookmarks",
+        select: "name email contact_number bookmarks isAdmin",
       })
       .select("-reports");
 
@@ -232,25 +232,25 @@ const deleteBookOnSale = async (req, res) => {
 };
 
 const reportABook = async (req, res) => {
-
   try {
     const reporter = req.user;
     const reportedBook = await BookForSale.findById(req.params.id);
     if (
       reportedBook.reports.length > 0 &&
       reportedBook.reports.filter(
-        (user) => user.toString() === reporter._id.toString()
+        (report) => report.reporter.toString() === reporter._id.toString()
       )
     ) {
       return res.status(404).send({
         error: "You have already reported this book",
       });
     }
-    reportedBook.reports.unshift(req.user);
+    reportedBook.reports.unshift({
+      reporter,
+    });
     await reportedBook.save();
     res.send();
   } catch (error) {
-
     res.status(500).send({
       error: error.message,
     });

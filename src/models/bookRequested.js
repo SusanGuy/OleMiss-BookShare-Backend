@@ -55,8 +55,14 @@ const bookRequestedSchema = new mongoose.Schema(
     },
     reports: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        reporter: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },

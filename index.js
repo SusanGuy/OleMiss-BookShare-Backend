@@ -4,6 +4,7 @@ const cors = require("cors");
 const userRouter = require("./src/routes/user");
 const bookForSaleRouter = require("./src/routes/bookForSale");
 const bookRequestedRouter = require("./src/routes/bookRequested");
+const adminRouter = require("./src/routes/admin");
 
 connectDB();
 
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true })); // for form data
 app.use("/users", userRouter);
 app.use("/sales", bookForSaleRouter);
 app.use("/requests", bookRequestedRouter);
+app.use("/admin", adminRouter);
 
 app.listen(port, () => {
   console.log("Server is up on port " + port);

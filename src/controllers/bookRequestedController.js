@@ -126,14 +126,16 @@ const reportABook = async (req, res) => {
     if (
       reportedBook.reports.length > 0 &&
       reportedBook.reports.filter(
-        (user) => user.toString() === reporter._id.toString()
+        (report) => report.reporter.toString() === reporter._id.toString()
       )
     ) {
       return res.status(404).send({
         error: "You have already reported this book",
       });
     }
-    reportedBook.reports.unshift(req.user);
+    reportedBook.reports.unshift({
+      reporter,
+    });
     await reportedBook.save();
     res.send();
   } catch (error) {
